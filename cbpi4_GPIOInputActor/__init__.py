@@ -30,19 +30,23 @@ class GPIOInputActor(CBPiActor):
         self.gpio = self.props.GPIO
         self.pud = GPIO.PUD_UP if self.props.get("Pull_Up_Down", "Down") == "Up" else GPIO.PUD_DOWN
         self.state = False
-        GPIO.setup(self.gpio, GPIO.IN, pull_up_down=self.pud)
-
+        GPIO.setup(self.gpio, GPIO.IN, pull_up_down=self.pud)        
+        logger.info("gpio " + str(self.gpio) + " pull_up_down: " + str(self.pud))
+            
     def get_state(self):
         return self.state
         
     async def run(self):
         while self.running == True:
-            if self.pud == GPIO.PUD_UP and GPIO.input(self.gpio) == GPIO.LOW:
+            input = GPIO.input(self.gpio)
+            if self.pud == GPIO.PUD_UP and input == GPIO.LOW:
                 self.state = True
-            elif self.pud == GPIO.PUD_DOWN and GPIO.input(self.gpio) == GPIO.HIGH:
+            elif self.pud == GPIO.PUD_DOWN and input == GPIO.HIGH:
                 self.state = True
             else:
                 self.state = False
+            
+            #logger.info("gpio " + str(self.gpio) + " input: " + str(input))                  
             await asyncio.sleep(1)
             
 def setup(cbpi):
